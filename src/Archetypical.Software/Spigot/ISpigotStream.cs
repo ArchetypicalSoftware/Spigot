@@ -1,11 +1,13 @@
-﻿namespace Archetypical.Software.Spigot
+﻿using System;
+
+namespace Archetypical.Software.Spigot
 {
     public interface ISpigotStream
     {
 
         bool TrySend(byte[] data);
 
-        byte[] MessageCallback();
+        event EventHandler<byte[]> DataArrived;
 
     }
 }

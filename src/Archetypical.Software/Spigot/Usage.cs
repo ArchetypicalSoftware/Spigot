@@ -6,7 +6,7 @@ namespace Archetypical.Software.Spigot
     {
         public Usage()
         {
-            Archetypical.Software.Spigot.Spigot.Setup(settings => {
+            Spigot.Setup(settings => {
                 
             });
 
