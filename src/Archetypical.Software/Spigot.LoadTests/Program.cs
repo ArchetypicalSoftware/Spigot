@@ -4,24 +4,25 @@ using BenchmarkDotNet.Running;
 
 namespace Spigot.LoadTests
 {
-    internal class Program
+    public class MyTestClass
     {
-        private static void Main(string[] args)
-        {
-            var summary = BenchmarkRunner.Run<Spigots>();
-        }
+        public int Test { get; set; }
     }
 
     [ClrJob, CoreJob, SimpleJob(baseline: true)]
-    [RankColumn]
+    [RankColumn, AllStatisticsColumn]
+    [MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvExporter, RPlotExporter, XmlExporter]
     public class Spigots
     {
         [Benchmark()]
         public void SendTest() => Spigot<MyTestClass>.Send(new MyTestClass());
     }
 
-    public class MyTestClass
+    internal class Program
     {
-        public int Test { get; set; }
+        private static void Main(string[] args)
+        {
+            BenchmarkRunner.Run<Spigots>();
+        }
     }
 }

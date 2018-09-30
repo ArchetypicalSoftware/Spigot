@@ -15,8 +15,16 @@ namespace Archetypical.Software.Spigot
             });
         }
 
+        /// <summary>
+        /// Gets invoked whenever an instance of T is received from the <see cref="ISpigotStream"/>
+        /// </summary>
         public static event EventHandler<EventArrived<T>> Open;
 
+
+        /// <summary>
+        /// Allows you to send an instance of T to the <see cref="ISpigotStream"/>
+        /// </summary>
+        /// <param name="eventData">The data to be sent over</param>
         public static void Send(T eventData)
         {
             var wrapper = new Envelope
@@ -67,9 +75,13 @@ namespace Archetypical.Software.Spigot
     public static class Spigot
     {
         internal static SpigotSettings Settings = new SpigotSettings();
-        private static bool _initialized;
         private static readonly ConcurrentDictionary<string, Action<EventArgs>> Knobs = new ConcurrentDictionary<string, Action<EventArgs>>();
+        private static bool _initialized;
 
+        /// <summary>
+        /// Allows for the configuration of the Spigot via an instance of <see cref="SpigotSettings"/>
+        /// </summary>
+        /// <param name="settingsBuilder">A delegate that will pass an instance of <see cref="SpigotSettings"/> with default values that can be overwritten by the implementer</param>
         public static void Setup(Action<SpigotSettings> settingsBuilder)
         {
             settingsBuilder(Settings);
