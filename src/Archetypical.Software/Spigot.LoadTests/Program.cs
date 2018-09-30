@@ -1,25 +1,22 @@
-﻿using System;
-using Archetypical.Software.Spigot;
+﻿using Archetypical.Software.Spigot;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
-
 namespace Spigot.LoadTests
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var summary = BenchmarkRunner.Run<Spigots>();
-
         }
     }
 
-    [ClrJob(true),CoreJob,DryCoreJob,DryCoreRtJob,DryClrJob,LegacyJitX64Job,SimpleJob]
+    [ClrJob, CoreJob, SimpleJob(baseline: true)]
     [RankColumn]
     public class Spigots
     {
-        [Benchmark]
+        [Benchmark()]
         public void SendTest() => Spigot<MyTestClass>.Send(new MyTestClass());
     }
 

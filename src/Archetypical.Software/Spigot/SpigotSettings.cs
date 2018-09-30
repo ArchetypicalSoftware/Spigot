@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Xml;
 
 namespace Archetypical.Software.Spigot
 {
+    /// <summary>
+    /// A collection of settings that control the Spigots in this domain
+    /// </summary>
     public class SpigotSettings
     {
         internal Func<ISpigotSerializer> SerializerFactory;
@@ -18,70 +16,39 @@ namespace Archetypical.Software.Spigot
             AddStream(new LocalStream());
             ApplicationName = Environment.CommandLine;
         }
+
+        /// <summary>
+        /// Add a custom implementation of an <see cref="ISpigotSerializer"/>
+        /// </summary>
+        /// <param name="serializer">An implementation of <see cref="ISpigotSerializer"/></param>
         public void AddSerializer(ISpigotSerializer serializer)
         {
             SerializerFactory = () => serializer;
         }
+
+        /// <summary>
+        /// Add a custom implementation of an <see cref="ISpigotStream"/>
+        /// </summary>
+        /// <param name="stream">An implementation of <see cref="ISpigotStream"/></param>
         public void AddStream(ISpigotStream stream)
         {
             StreamFactory = () => stream;
         }
 
+        /// <summary>
+        /// The name of the current application.
+        /// </summary>
+        /// <remarks>Set this to indicate which business-friendly product is hosting these spigots</remarks>
+        /// <example>Inventory Service, Billing Service, Monitoring Application</example>
         public string ApplicationName { get; set; }
-    }
 
-    class DefaultDataContractSerializer : ISpigotSerializer
-    {
-        internal class GenericResolver : DataContractResolver
-        {
-            public override Type ResolveName(string typeName, string typeNamespace, Type declaredType, DataContractResolver knownTypeResolver)
-            {
-                throw new NotImplementedException();
-            }
+        /// <summary>
+        /// The unique identifier of this instance. 
+        /// </summary>
+        public Guid InstanceIdentifier { get; } = Guid.NewGuid();
 
-            public override bool TryResolveType(Type type, Type declaredType, DataContractResolver knownTypeResolver,
-                out XmlDictionaryString typeName, out XmlDictionaryString typeNamespace)
-            {
-                throw new NotImplementedException();
-            }
-        }
 
-        private static readonly ConcurrentDictionary<Type, DataContractSerializer> Serializers = new ConcurrentDictionary<Type, DataContractSerializer>();
-        private DataContractSerializerSettings _settings = new DataContractSerializerSettings();
-        public DefaultDataContractSerializer()
-        {
-            _settings.DataContractResolver = new GenericResolver();
-            _settings.IgnoreExtensionDataObject = true;
-            _settings.SerializeReadOnlyTypes = true;
-            
-        }
-         public byte[] Serialize<T>(T dataToSerialize) where T : class, new()
-         {
-             var serializer = Serializers.GetOrAdd(typeof(T), new DataContractSerializer(typeof(T),_settings));
-            using (var stream = new MemoryStream())
-            {
-                serializer.WriteObject(stream, dataToSerialize);
-                return stream.ToArray();
-            }
-         }
-
-        public T Deserialize<T>(byte[] serializedByteArray) where T : class, new()
-        {
-            var serializer = Serializers.GetOrAdd(typeof(T), new DataContractSerializer(typeof(T)));
-            using (var stream = new MemoryStream(serializedByteArray))
-            {
-                return serializer.ReadObject(stream) as T;
-            }
-        }
-    }
-
-    class LocalStream : ISpigotStream {
-        public bool TrySend(byte[] data)
-        {
-            DataArrived?.Invoke(this, data);
-            return true;
-        }
-
-        public event EventHandler<byte[]> DataArrived;
+        public Action<Envelope> BeforeSend { get; set; }
+        public Action<Envelope> AfterReceive { get; set; }
     }
 }

@@ -6,8 +6,8 @@ namespace Archetypical.Software.Spigot
     {
         public Usage()
         {
-            Spigot.Setup(settings => {
-                
+            Spigot.Setup(settings =>
+            {
             });
 
             Spigot<SomeEvent>.Open += _EventArrived;

@@ -3,7 +3,4 @@
     public class SomeEvent
     {
     }
-
-
-    
 }

@@ -1,29 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-
-namespace Archetypical.Software.Spigot
+﻿namespace Archetypical.Software.Spigot
 {
-    
-    public class Envelope : EventArgs
-    { 
-        public string Event { get; set; }
-        public string FQN { get; set; }
-        public Guid MessageIdentifier { get; set; }
-        public Sender Sender { get; set; }
-        public List<Header> Headers { get; set; }
-        public byte[] SerializedEventData { get; set; }
-    }
-
+    /// <summary>
+    /// The message being sent along with the <see cref="Context"/>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class EventArrived<T>
     {
-        public T GetT { get; set; }
+        /// <summary>
+        /// The value from the sender
+        /// </summary>
+        public T EventData { get; set; }
+        /// <summary>
+        /// The Senders <see cref="Context"/>
+        /// </summary>
         public Context Context { get; set; }
     }
-
-    public class Context
-    {
-        public Sender Sender { get; set; }
-        public List<Header> Headers { get; set; }
-}
 }
