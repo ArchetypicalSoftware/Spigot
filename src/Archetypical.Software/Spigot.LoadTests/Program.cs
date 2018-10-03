@@ -16,6 +16,17 @@ namespace Spigot.LoadTests
     {
         [Benchmark()]
         public void SendTest() => Spigot<MyTestClass>.Send(new MyTestClass());
+
+        [Benchmark]
+        public void Serialize()
+        {
+            var bytes = Archetypical.Software.Spigot.Spigot.Settings.SerializerFactory().Serialize<MyTestClass>(new MyTestClass()
+            {
+                Test = int.MaxValue
+            });
+        
+            var copy = Archetypical.Software.Spigot.Spigot.Settings.SerializerFactory().Deserialize<MyTestClass>(bytes);
+        }
     }
 
     internal class Program
