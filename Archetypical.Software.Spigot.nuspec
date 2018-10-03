@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Archetypical.Software.Spigot</id>
+        <version>$version$</version>
+        <authors>Archetypical.Software</authors>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>
+           desc
+        </description>
+        <dependencies>
+            <dependency id="Microsoft.Extensions.Logging" version="2.2.1" />
+            <dependency id="Polly" version="6.1.0" />
+        </dependencies>
+    </metadata>
+    <files>
+    <file src="src\Archetypical.Software\Spigot\bin\Release\netstandard2.0\Archetypical.Software.Spigot.dll" target="lib\netstandard2.0\Archetypical.Software.Spigot.dll" />
+    <file src="src\Archetypical.Software\Spigot\bin\Release\netstandard2.0\Archetypical.Software.Spigot.xml" target="lib\netstandard2.0\Archetypical.Software.Spigot.xml" />
+   </files>
+</package>
