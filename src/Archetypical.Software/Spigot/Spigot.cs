@@ -15,7 +15,7 @@ namespace Archetypical.Software.Spigot
             Spigot.Register(typeof(T), args =>
             {
                 if (!(args is Envelope arrived)) return;
-                Logger.LogTrace("Envelope of type [{0}] arrived with id {1}", arrived.Event,arrived.MessageIdentifier);
+                Logger.LogTrace("Envelope of type [{0}] arrived with id {1}", arrived.Event, arrived.MessageIdentifier);
                 Dispatch(arrived);
             });
             Logger = Spigot.Settings.LoggerFactory.CreateLogger(typeof(Spigot<T>));
@@ -26,7 +26,7 @@ namespace Archetypical.Software.Spigot
         /// </summary>
         public static event EventHandler<EventArrived<T>> Open;
 
-       
+
 
         /// <summary>
         /// Allows you to send an instance of T to the <see cref="ISpigotStream"/>
@@ -49,14 +49,20 @@ namespace Archetypical.Software.Spigot
             };
             Spigot.Settings.BeforeSend?.Invoke(wrapper);
             Logger.LogTrace("Sending [{0}] with id {1}", wrapper.Event, wrapper.MessageIdentifier);
+            //Send it to all listeners in the same process space
+            Dispatch(wrapper);
+
             var bytes = Spigot.Settings.SerializerFactory().Serialize(wrapper);
+
             Spigot.Settings.Resilience.Sending.Execute(() =>
-                {
-                    Logger.LogTrace("Sending using resilience.");
-                    Spigot.Settings.StreamFactory().TrySend(bytes);
-                }
-                );
-            
+                    {
+                        Logger.LogTrace("Sending using resilience.");
+                        var result = Spigot.Settings.StreamFactory()?.TrySend(bytes);
+                        if (!result.GetValueOrDefault())
+                        {
+                            throw new Exception("Sending exception");
+                        }
+                    });
         }
 
         private static void Dispatch(Envelope e)
@@ -106,7 +112,7 @@ namespace Archetypical.Software.Spigot
                 Settings.StreamFactory().DataArrived -= Spigot_DataArrived;
                 Logger?.LogWarning("Spigot Settings were already configured and settings are being overwritten");
             }
-            
+
             settingsBuilder(Settings);
             Settings.StreamFactory().DataArrived += Spigot_DataArrived;
             _initialized = true;
@@ -117,7 +123,7 @@ namespace Archetypical.Software.Spigot
             if (!_initialized)
             {
                 Setup(w => { /*Take the defaults*/ });
-                
+
             }
 
             if (Logger == null)
