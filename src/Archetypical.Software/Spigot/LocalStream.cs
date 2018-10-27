@@ -10,9 +10,9 @@ namespace Archetypical.Software.Spigot
         /// <inheritdoc />
         public bool TrySend(byte[] data)
         {
-            DataArrived?.Invoke(this, data);
             return true;
         }
+
         /// <inheritdoc />
         public event EventHandler<byte[]> DataArrived;
     }
