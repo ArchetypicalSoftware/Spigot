@@ -2,14 +2,17 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>Archetypical.Software.Spigot</id>
-        <version>1.0.1</version>
+        <version>$version$</version>
         <authors>Archetypical.Software</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>
-           desc
+           Spigot is a transparent pub sub mechanism that layers streams and serializers on top of a familiar event based system. You can create a spigot to listen to any concrete serializable type and attach any number of event handlers to receive the message. Using the same spigot, you can 
+           broadcast any concrete serializable type to any listeners listening on the same stream. 
+           A spigot is serializer and stream agnostic which means you can serialize with any mechanism you like and send the bytes over any mechanism you like. 
+           Pre-Sending and Post-Receive hooks are defined so youc an manipulate the envelope to send additional information to be used by the receiver on the other side.
         </description>
         <dependencies>
-            <dependency id="Microsoft.Extensions.Logging" version="2.2.1" />
+            <dependency id="Microsoft.Extensions.Logging" version="2.1.1" />
             <dependency id="Polly" version="6.1.0" />
         </dependencies>
     </metadata>

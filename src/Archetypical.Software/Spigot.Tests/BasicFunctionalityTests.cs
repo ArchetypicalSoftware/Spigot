@@ -8,56 +8,14 @@ using Xunit.Abstractions;
 
 namespace Spigot.Tests
 {
-    class XunitLoggerProvider :ILoggerProvider
+    public class BasicFunctionalityTests
     {
-        private ITestOutputHelper _outputHelper;
-        public XunitLoggerProvider(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        private ILoggerFactory factory;
 
-        public ILogger CreateLogger(string categoryName)
-        {
-            return new XunitLogger(_outputHelper);
-        }
-    }
-
-    class XunitLogger: ILogger
-    {
-        private ITestOutputHelper _outputHelper;
-        public XunitLogger(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-            _outputHelper.WriteLine($"{logLevel}:Thread:{Thread.CurrentThread.ManagedThreadId} - {formatter(state, exception)}");
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true
-                ;
-        }
-
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-public class BasicFunctionalityTests
-    {
-        ILoggerFactory factory;
         public BasicFunctionalityTests(ITestOutputHelper outputHelper)
         {
             factory = new LoggerFactory();
-                factory.AddProvider(new XunitLoggerProvider(outputHelper));
+            factory.AddProvider(new XunitLoggerProvider(outputHelper));
 
             Debug.Listeners.Add(new DefaultTraceListener());
             Archetypical.Software.Spigot.Spigot.Setup(settings =>
@@ -73,7 +31,7 @@ public class BasicFunctionalityTests
             var testNumber = 100;
             void FirstHandler(object s, EventArrived<SimpleClass1> e)
             {
-                if(e.EventData.Index == testNumber ) eventsReceived++;
+                if (e.EventData.Index == testNumber) eventsReceived++;
             }
             void SecondHandler(object s, EventArrived<ComplexClass> e)
             {
@@ -164,7 +122,7 @@ public class BasicFunctionalityTests
             {
                 if (e.EventData.Index == testNumber) eventsClass1Received++;
             }
-            
+
             void OnOpen(object s, EventArrived<ComplexClass> e)
             {
                 if (e.EventData.Index == testNumber) eventsClass2Received++;
@@ -180,21 +138,20 @@ public class BasicFunctionalityTests
             Spigot<ComplexClass>.Open -= OnOpen;
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
 
-
             Assert.Equal(2, eventsClass1Received);
             Assert.Equal(1, eventsClass2Received);
         }
-
 
         [Fact]
         public void Pre_And_Post_Handlers_Work_As_Expected()
         {
             var expected = Guid.NewGuid().ToString();
-            Archetypical.Software.Spigot.Spigot.Setup(settings => { settings.BeforeSend = env =>
-                {
-                    env.Headers.Add(new Header("Test",expected));
-                };
-                
+            Archetypical.Software.Spigot.Spigot.Setup(settings =>
+            {
+                settings.BeforeSend = env =>
+{
+env.Headers.Add(new Header("Test", expected));
+};
             });
             var testNumber = 600;
 
@@ -208,12 +165,26 @@ public class BasicFunctionalityTests
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
         }
 
+        [Fact]
+        public void Correct_number_of_iterations()
+        {
+            var cde = new CountdownEvent(100);
+            Spigot<ComplexClass>.Open += (cl, context) => { cde.Signal(); };
+            for (var i = 0; i < 100; i++)
+            {
+                Spigot<ComplexClass>.Send(new ComplexClass());
+            }
+
+            cde.Wait(TimeSpan.FromMilliseconds(10 * 100));
+            Assert.Equal(0, cde.CurrentCount);
+        }
 
         [Fact]
         public void Serialization_And_Deserialization_Work_As_Expected()
         {
             var expected = Guid.NewGuid().ToString();
-            Archetypical.Software.Spigot.Spigot.Setup(settings => {
+            Archetypical.Software.Spigot.Spigot.Setup(settings =>
+            {
                 settings.BeforeSend = env =>
                 {
                     env.Headers.Add(new Header("Test", expected));
@@ -235,16 +206,17 @@ public class BasicFunctionalityTests
 
         public class SimpleClass1
         {
-            public SimpleClass1():this(-1)
+            public SimpleClass1() : this(-1)
             {
-                
             }
+
             public SimpleClass1(int index)
             {
                 Index = index;
                 Guid = Guid.NewGuid();
                 DateTimeOffset = DateTimeOffset.Now;
             }
+
             public Guid Guid { get; set; }
             public DateTimeOffset DateTimeOffset { get; set; }
             public int Index { get; set; }
@@ -252,20 +224,20 @@ public class BasicFunctionalityTests
 
         public class ComplexClass
         {
-            public ComplexClass():this (-1)
+            public ComplexClass() : this(-1)
             {
-                
             }
+
             public ComplexClass(int index)
             {
                 Index = index;
                 SimpleClass1 = new SimpleClass1(index)
                 {
-
                 };
                 Guid = Guid.NewGuid();
                 DateTimeOffset = DateTimeOffset.UtcNow;
             }
+
             public int Index { get; set; }
             public SimpleClass1 SimpleClass1 { get; set; }
             public Guid Guid { get; set; }
