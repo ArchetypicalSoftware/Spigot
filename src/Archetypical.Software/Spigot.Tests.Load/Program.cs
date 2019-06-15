@@ -1,14 +1,15 @@
-﻿using System;
-using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Running;
+using System;
 
-namespace Spigot.LoadTests
+namespace Spigot.Tests.Load
 {
-    internal class Program
+    public class Program
     {
         private static void Main(string[] args)
         {
             var summary = BenchmarkRunner.Run<Spigots>();
-            var x = summary;
+            Console.WriteLine(summary.AllRuntimes);
+            Console.WriteLine(summary.ResultsDirectoryPath);
             Console.ReadKey();
         }
     }

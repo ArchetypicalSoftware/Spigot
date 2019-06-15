@@ -1,7 +1,7 @@
 # Spigot
 ### Your tap into custom event streams from any source
 
-[![Build status](https://ci.appveyor.com/api/projects/status/u4xwybm34bs2kvla/branch/master?svg=true)](https://ci.appveyor.com/project/ewassef/spigot/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/xm19400akpjdb0uy/branch/master?svg=true)](https://ci.appveyor.com/project/ArchetypicalSoftware/spigot/branch/master)
 
 Spigot allows you to simply connect into any event stream to pull in and publish strongly typed objects rather than simple strings.
 
@@ -24,7 +24,7 @@ This pattern provides greater network scalability and a more dynamic network top
 
 Subscribing to an event is as easy as :
 
-```csharp
+```
 ...
  void OnSpigotOnOpen(object sender, EventArrived<MessageICareAbout> e)
             {
@@ -40,7 +40,7 @@ Spigot<MessageICareAbout>.Open += OnSpigotOnOpen;
 
 Unsubscribing is just as simple:
 
-```csharp
+```
 
     Spigot<MessageICareAbout>.Open -= OnSpigotOnOpen;
 

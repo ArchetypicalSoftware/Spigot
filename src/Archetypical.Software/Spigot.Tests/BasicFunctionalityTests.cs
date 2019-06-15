@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Archetypical.Software.Spigot;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Diagnostics;
 using System.Threading;
-using Archetypical.Software.Spigot;
-using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,11 +31,17 @@ namespace Spigot.Tests
             var testNumber = 100;
             void FirstHandler(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) eventsReceived++;
+                if (e.EventData.Index == testNumber)
+                {
+                    eventsReceived++;
+                }
             }
             void SecondHandler(object s, EventArrived<ComplexClass> e)
             {
-                if (e.EventData.Index == testNumber) eventsReceived++;
+                if (e.EventData.Index == testNumber)
+                {
+                    eventsReceived++;
+                }
             }
 
             Spigot<SimpleClass1>.Open += FirstHandler;
@@ -44,6 +50,8 @@ namespace Spigot.Tests
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
             Spigot<ComplexClass>.Send(new ComplexClass(testNumber));
+            WaitFor<SimpleClass1>();
+            WaitFor<ComplexClass>();
             Spigot<SimpleClass1>.Open -= FirstHandler;
             Spigot<ComplexClass>.Open -= SecondHandler;
             Assert.Equal(3, eventsReceived);
@@ -56,12 +64,16 @@ namespace Spigot.Tests
 
             void OnSpigotOnOpen(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) eventsReceived++;
+                if (e.EventData.Index == testNumber)
+                {
+                    eventsReceived++;
+                }
             }
 
             Spigot<SimpleClass1>.Open += OnSpigotOnOpen;
             Spigot<SimpleClass1>.Open += OnSpigotOnOpen;
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
+            WaitFor<SimpleClass1>();
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
 
@@ -75,20 +87,42 @@ namespace Spigot.Tests
             var testNumber = 300;
             void FirstHandler(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) eventsReceived++;
+                if (e.EventData.Index == testNumber)
+                {
+                    Interlocked.Increment(ref eventsReceived);
+                }
             }
             void SecondHandler(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) eventsReceived++;
+                if (e.EventData.Index == testNumber)
+                {
+                    Interlocked.Increment(ref eventsReceived);
+                }
             }
             Spigot<SimpleClass1>.Open += FirstHandler;
             Spigot<SimpleClass1>.Open += SecondHandler;
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
+            WaitFor<SimpleClass1>();
+            Assert.Equal(2, eventsReceived);
             Spigot<SimpleClass1>.Open -= FirstHandler;
 
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
             Spigot<SimpleClass1>.Open -= SecondHandler;
+            WaitFor<SimpleClass1>();
             Assert.Equal(3, eventsReceived);
+        }
+
+        private static void WaitFor<T>(TimeSpan? span = null) where T : class, new()
+        {
+            var iterations = span.GetValueOrDefault(TimeSpan.FromSeconds(2)).TotalMilliseconds / 100;
+            while (iterations > 0 && Spigot<T>.HasOutstandingHandles)
+            {
+                Thread.Sleep(100);
+                iterations--;
+            }
+
+            Assert.False(Spigot<T>.HasOutstandingHandles, $"Still outstanding events after {span.GetValueOrDefault(TimeSpan.FromSeconds(2)).TotalMilliseconds * 100} ms");
+            Assert.Equal(0, Spigot<T>.outstandingThreads);
         }
 
         [Fact]
@@ -100,11 +134,15 @@ namespace Spigot.Tests
             void OnSpigotOnOpen(object s, EventArrived<SimpleClass1> e) => throw new Exception();
             void OnOpen(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) eventsReceived++;
+                if (e.EventData.Index == testNumber)
+                {
+                    eventsReceived++;
+                }
             }
             Spigot<SimpleClass1>.Open += OnSpigotOnOpen;
             Spigot<SimpleClass1>.Open += OnOpen;
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
+            WaitFor<SimpleClass1>();
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
             Spigot<SimpleClass1>.Open -= OnOpen;
 
@@ -120,12 +158,18 @@ namespace Spigot.Tests
 
             void OnSpigotOnOpen(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) eventsClass1Received++;
+                if (e.EventData.Index == testNumber)
+                {
+                    eventsClass1Received++;
+                }
             }
 
             void OnOpen(object s, EventArrived<ComplexClass> e)
             {
-                if (e.EventData.Index == testNumber) eventsClass2Received++;
+                if (e.EventData.Index == testNumber)
+                {
+                    eventsClass2Received++;
+                }
             }
 
             Spigot<ComplexClass>.Open += OnOpen;
@@ -134,6 +178,9 @@ namespace Spigot.Tests
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
             Spigot<ComplexClass>.Send(new ComplexClass(testNumber));
+
+            WaitFor<SimpleClass1>();
+            WaitFor<ComplexClass>();
 
             Spigot<ComplexClass>.Open -= OnOpen;
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
@@ -150,19 +197,23 @@ namespace Spigot.Tests
             {
                 settings.BeforeSend = env =>
 {
-env.Headers.Add(new Header("Test", expected));
+    env.Headers.Add(new Header("Test", expected));
 };
             });
             var testNumber = 600;
 
             void OnSpigotOnOpen(object s, EventArrived<SimpleClass1> e)
             {
-                if (e.EventData.Index == testNumber) Assert.Equal(expected, e.Context.Headers["Test"]?.Value);
+                if (e.EventData.Index == testNumber)
+                {
+                    Assert.Equal(expected, e.Context.Headers["Test"]?.Value);
+                }
             }
 
             Spigot<SimpleClass1>.Open += OnSpigotOnOpen;
             Spigot<SimpleClass1>.Send(new SimpleClass1(testNumber));
             Spigot<SimpleClass1>.Open -= OnSpigotOnOpen;
+            WaitFor<SimpleClass1>();
         }
 
         [Fact]
@@ -177,6 +228,7 @@ env.Headers.Add(new Header("Test", expected));
 
             cde.Wait(TimeSpan.FromMilliseconds(10 * 100));
             Assert.Equal(0, cde.CurrentCount);
+            WaitFor<ComplexClass>();
         }
 
         [Fact]
@@ -196,11 +248,15 @@ env.Headers.Add(new Header("Test", expected));
 
             void OnSpigotOnOpen(object s, EventArrived<ComplexClass> e)
             {
-                if (e.EventData.Index == testNumber) Assert.Equal(complexClass.GetHashCode(), e.EventData.GetHashCode());
+                if (e.EventData.Index == testNumber)
+                {
+                    Assert.Equal(complexClass.GetHashCode(), e.EventData.GetHashCode());
+                }
             }
 
             Spigot<ComplexClass>.Open += OnSpigotOnOpen;
             Spigot<ComplexClass>.Send(complexClass);
+            WaitFor<ComplexClass>();
             Spigot<ComplexClass>.Open -= OnSpigotOnOpen;
         }
 

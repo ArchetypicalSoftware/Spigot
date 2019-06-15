@@ -1,18 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using Archetypical.Software.Spigot;
+﻿using Archetypical.Software.Spigot;
 using BenchmarkDotNet.Attributes;
+using System;
+using System.Threading;
+using System.Threading.Tasks.Dataflow;
 
-namespace Spigot.LoadTests
+namespace Spigot.Tests.Load
 {
-    [ClrJob]
+    [ClrJob, CoreJob]
     [RankColumn, AllStatisticsColumn, IterationsColumn]
     [MemoryDiagnoser]
     [MarkdownExporter, HtmlExporter, RPlotExporter, XmlExporter]
     public class Spigots
     {
-        [Params(1, 10, 20, 30, 40, 50, 100)]
+        [Params(1, 10, 20, 30, 40, 50, 100, 500, 1000, 10000)]
         public int Iterations { get; set; } = 100;
 
         [Benchmark]
@@ -26,7 +26,16 @@ namespace Spigot.LoadTests
             }
 
             Spigot<MyTestClass>.Open += OnSpigotOnOpen;
-            Enumerable.Range(0, Iterations).AsParallel().ForAll(i => Spigot<MyTestClass>.Send(new MyTestClass()));
+            var block = new ActionBlock<int>(i => Spigot<MyTestClass>.Send(new MyTestClass() { Test = i }));
+
+            for (int i = 0; i < Iterations; i++)
+            {
+                block.Post(i);
+            }
+
+            block.Complete();
+
+            block.Completion.GetAwaiter().GetResult();
 
             cde.Wait(TimeSpan.FromMilliseconds(10 * Iterations));
             Spigot<MyTestClass>.Open -= OnSpigotOnOpen;

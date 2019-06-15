@@ -1,23 +1,36 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Spigot.LoadTests")]
+[assembly: InternalsVisibleTo("Spigot.Tests")]
+
 namespace Archetypical.Software.Spigot
 {
     public static class Spigot<T> where T : class, new()
     {
         private static readonly ILogger Logger;
+        internal static volatile int outstandingThreads = 0;
+
+        public static bool HasOutstandingHandles => outstandingThreads > 0;
+
         static Spigot()
         {
             Spigot.Register(typeof(T), args =>
             {
-                if (!(args is Envelope arrived)) return;
+                if (!(args is Envelope arrived))
+                {
+                    return;
+                }
+
                 Logger.LogTrace("Envelope of type [{0}] arrived with id {1}", arrived.Event, arrived.MessageIdentifier);
                 Dispatch(arrived);
             });
+
             Logger = Spigot.Settings.LoggerFactory.CreateLogger(typeof(Spigot<T>));
         }
 
@@ -25,8 +38,6 @@ namespace Archetypical.Software.Spigot
         /// Gets invoked whenever an instance of T is received from the <see cref="ISpigotStream"/>
         /// </summary>
         public static event EventHandler<EventArrived<T>> Open;
-
-
 
         /// <summary>
         /// Allows you to send an instance of T to the <see cref="ISpigotStream"/>
@@ -67,7 +78,11 @@ namespace Archetypical.Software.Spigot
 
         private static void Dispatch(Envelope e)
         {
-            if (Open == null) return;
+            if (Open == null)
+            {
+                return;
+            }
+
             Spigot.Settings.AfterReceive?.Invoke(e);
             var raisedEvent = new EventArrived<T>
             {
@@ -81,14 +96,18 @@ namespace Archetypical.Software.Spigot
             Logger.LogTrace($"Received {e.Event} message from stream with id {e.MessageIdentifier}");
             Open?.GetInvocationList().ToList().ForEach(del =>
             {
-                try
+                Task.Run(() =>
                 {
-                    del.DynamicInvoke(Spigot.Settings.StreamFactory(), raisedEvent);
-                }
-                catch (Exception)
-                {
-                    //Log
-                }
+                    Interlocked.Increment(ref outstandingThreads);
+                    return del.DynamicInvoke(Spigot.Settings.StreamFactory(), raisedEvent);
+                }).ContinueWith(t =>
+                    {
+                        //Interlocked.Decrement(ref outstandingThreads);
+                    }, TaskContinuationOptions.OnlyOnFaulted)
+                    .ContinueWith(t =>
+                    {
+                        Interlocked.Decrement(ref outstandingThreads);
+                    }, TaskContinuationOptions.RunContinuationsAsynchronously);
             });
         }
     }
@@ -98,7 +117,7 @@ namespace Archetypical.Software.Spigot
         internal static SpigotSettings Settings = new SpigotSettings();
         private static readonly ConcurrentDictionary<string, Action<EventArgs>> Knobs = new ConcurrentDictionary<string, Action<EventArgs>>();
         private static bool _initialized;
-        private static ILogger Logger;
+        private static ILogger _logger;
 
         /// <summary>
         /// Allows for the configuration of the Spigot via an instance of <see cref="SpigotSettings"/>
@@ -110,7 +129,7 @@ namespace Archetypical.Software.Spigot
             {
                 Settings = new SpigotSettings();
                 Settings.StreamFactory().DataArrived -= Spigot_DataArrived;
-                Logger?.LogWarning("Spigot Settings were already configured and settings are being overwritten");
+                _logger?.LogWarning("Spigot Settings were already configured and settings are being overwritten");
             }
 
             settingsBuilder(Settings);
@@ -123,15 +142,14 @@ namespace Archetypical.Software.Spigot
             if (!_initialized)
             {
                 Setup(w => { /*Take the defaults*/ });
-
             }
 
-            if (Logger == null)
+            if (_logger == null)
             {
-                Logger = Settings.LoggerFactory.CreateLogger(typeof(Spigot));
+                _logger = Settings.LoggerFactory.CreateLogger(typeof(Spigot));
             }
             Knobs[type.Name] = spigotCallback;
-            Logger.LogTrace("Spigot Callback Registered for {0}", type.Name);
+            _logger.LogTrace("Spigot Callback Registered for {0}", type.Name);
         }
 
         private static void Spigot_DataArrived(object sender, byte[] e)
