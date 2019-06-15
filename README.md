@@ -1,6 +1,6 @@
 # Spigot
 ### Your tap into custom event streams from any source
-
+ 
 [![Build status](https://ci.appveyor.com/api/projects/status/xm19400akpjdb0uy/branch/master?svg=true)](https://ci.appveyor.com/project/ArchetypicalSoftware/spigot/branch/master)
 
 Spigot allows you to simply connect into any event stream to pull in and publish strongly typed objects rather than simple strings.
