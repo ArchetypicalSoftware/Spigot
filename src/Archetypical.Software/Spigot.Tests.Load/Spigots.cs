@@ -1,36 +1,112 @@
-﻿using System;
+﻿using Archetypical.Software.Spigot;
+using Archetypical.Software.Spigot.Extensions;
+using BenchmarkDotNet.Attributes;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 using System.Threading;
-using Archetypical.Software.Spigot;
-using BenchmarkDotNet.Attributes;
+using Microsoft.Extensions.Logging;
 
-namespace Spigot.LoadTests
+namespace Spigot.Tests.Load
 {
-    [ClrJob]
+    [SimpleJob(runtimeMoniker: BenchmarkDotNet.Jobs.RuntimeMoniker.NetCoreApp31)]
+    [SimpleJob(runtimeMoniker: BenchmarkDotNet.Jobs.RuntimeMoniker.Net472)]
     [RankColumn, AllStatisticsColumn, IterationsColumn]
     [MemoryDiagnoser]
-    [MarkdownExporter, HtmlExporter, RPlotExporter, XmlExporter]
+    [MarkdownExporter, HtmlExporter, XmlExporter, RPlotExporter]
     public class Spigots
     {
-        [Params(1, 10, 20, 30, 40, 50, 100)]
-        public int Iterations { get; set; } = 100;
+        public Spigots()
+        {
+            var services = new ServiceCollection();
+            var config = new ConfigurationBuilder().Build();
+            cde = new CountdownEvent(10000);
+            services
+                .AddSingleton(cde)
+                .AddLogging()
+                .AddSpigot(config)
+                .AddKnob<SignalingHandler, MyTestClass>()
+                .Build();
+            serviceProvider = services.BuildServiceProvider();
+        }
+
+        private CountdownEvent cde;
+        private ServiceProvider serviceProvider;
+
+        //[Params(1, 10, 20, 30, 40, 50, 100, 250, 500, 1000, 5000, 10000)]
+        //public int Iterations { get; set; } = 100;
 
         [Benchmark]
-        public int SendTest()
+        public int SendOne()
         {
-            var cde = new CountdownEvent(Iterations);
-
-            void OnSpigotOnOpen(object sender, EventArrived<MyTestClass> e)
-            {
-                cde.Signal();
-            }
-
-            Spigot<MyTestClass>.Open += OnSpigotOnOpen;
-            Enumerable.Range(0, Iterations).AsParallel().ForAll(i => Spigot<MyTestClass>.Send(new MyTestClass()));
-
-            cde.Wait(TimeSpan.FromMilliseconds(10 * Iterations));
-            Spigot<MyTestClass>.Open -= OnSpigotOnOpen;
+            var sender = serviceProvider.GetService<MessageSender<MyTestClass>>();
+            sender.Send(new MyTestClass());
+            cde.Wait(TimeSpan.FromMilliseconds(10));
             return cde.CurrentCount;
+        }
+
+        [Benchmark]
+        public int SendTen()
+        {
+            var sender = serviceProvider.GetService<MessageSender<MyTestClass>>();
+            for (int i = 0; i < 10; i++)
+            {
+                sender.Send(new MyTestClass());
+            }
+            cde.Wait(TimeSpan.FromMilliseconds(10));
+            return cde.CurrentCount;
+        }
+
+        [Benchmark(Baseline = true)]
+        public int SendOneHundred()
+        {
+            var sender = serviceProvider.GetService<MessageSender<MyTestClass>>();
+            for (int i = 0; i < 100; i++)
+            {
+                sender.Send(new MyTestClass());
+            }
+            cde.Wait(TimeSpan.FromMilliseconds(100));
+            return cde.CurrentCount;
+        }
+
+        [Benchmark]
+        public int SendThousand()
+        {
+            var sender = serviceProvider.GetService<MessageSender<MyTestClass>>();
+            for (int i = 0; i < 1000; i++)
+            {
+                sender.Send(new MyTestClass());
+            }
+            cde.Wait(TimeSpan.FromMilliseconds(1000));
+            return cde.CurrentCount;
+        }
+
+        [Benchmark]
+        public int SendTenThousand()
+        {
+            var sender = serviceProvider.GetService<MessageSender<MyTestClass>>();
+            for (int i = 0; i < 10000; i++)
+            {
+                sender.Send(new MyTestClass());
+            }
+            cde.Wait(TimeSpan.FromMilliseconds(10000));
+            return cde.CurrentCount;
+        }
+    }
+
+    public class SignalingHandler : Knob<MyTestClass>
+    {
+        private readonly CountdownEvent _cde;
+
+        public SignalingHandler(CountdownEvent cde, Archetypical.Software.Spigot.Spigot spigot, ILogger<Knob<MyTestClass>> logger) : base(spigot, logger)
+        {
+            _cde = cde;
+        }
+
+        protected override void HandleMessage(EventArrived<MyTestClass> message)
+        {
+            _cde.Signal();
         }
     }
 }

@@ -1,143 +1,100 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using Archetypical.Software.Spigot.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Runtime.CompilerServices;
+using CloudNative.CloudEvents;
+using Microsoft.Extensions.DependencyInjection;
 
 [assembly: InternalsVisibleTo("Spigot.LoadTests")]
+
 namespace Archetypical.Software.Spigot
 {
-    public static class Spigot<T> where T : class, new()
+    /// <summary>
+    /// A Spigot allows access to get and send streams of strongly typed messages
+    /// </summary>
+    public class Spigot
     {
-        private static readonly ILogger Logger;
-        static Spigot()
+        private readonly ILogger<Spigot> _logger;
+
+        internal readonly ConcurrentDictionary<string, Action<CloudEvent>> Knobs =
+            new ConcurrentDictionary<string, Action<CloudEvent>>();
+
+        public Spigot(ILogger<Spigot> logger)
         {
-            Spigot.Register(typeof(T), args =>
-            {
-                if (!(args is Envelope arrived)) return;
-                Logger.LogTrace("Envelope of type [{0}] arrived with id {1}", arrived.Event, arrived.MessageIdentifier);
-                Dispatch(arrived);
-            });
-            Logger = Spigot.Settings.LoggerFactory.CreateLogger(typeof(Spigot<T>));
+            _logger = logger;
         }
 
-        /// <summary>
-        /// Gets invoked whenever an instance of T is received from the <see cref="ISpigotStream"/>
-        /// </summary>
-        public static event EventHandler<EventArrived<T>> Open;
-
-
-
-        /// <summary>
-        /// Allows you to send an instance of T to the <see cref="ISpigotStream"/>
-        /// </summary>
-        /// <param name="eventData">The data to be sent over</param>
-        public static void Send(T eventData)
-        {
-            var wrapper = new Envelope
-            {
-                SerializedEventData = Spigot.Settings.SerializerFactory().Serialize(eventData),
-                Event = typeof(T).Name,
-                FQN = typeof(T).FullName,
-                MessageIdentifier = Guid.NewGuid(),
-                Sender = new Sender
-                {
-                    ProcessId = Environment.CurrentManagedThreadId,
-                    Name = Spigot.Settings.ApplicationName,
-                    InstanceIdentifier = Spigot.Settings.InstanceIdentifier
-                }
-            };
-            Spigot.Settings.BeforeSend?.Invoke(wrapper);
-            Logger.LogTrace("Sending [{0}] with id {1}", wrapper.Event, wrapper.MessageIdentifier);
-            //Send it to all listeners in the same process space
-            Dispatch(wrapper);
-
-            var bytes = Spigot.Settings.SerializerFactory().Serialize(wrapper);
-
-            Spigot.Settings.Resilience.Sending.Execute(() =>
-                    {
-                        Logger.LogTrace("Sending using resilience.");
-                        var result = Spigot.Settings.StreamFactory()?.TrySend(bytes);
-                        if (!result.GetValueOrDefault())
-                        {
-                            throw new Exception("Sending exception");
-                        }
-                    });
-        }
-
-        private static void Dispatch(Envelope e)
-        {
-            if (Open == null) return;
-            Spigot.Settings.AfterReceive?.Invoke(e);
-            var raisedEvent = new EventArrived<T>
-            {
-                EventData = Spigot.Settings.SerializerFactory().Deserialize<T>(e.SerializedEventData),
-                Context = new Context
-                {
-                    Headers = e.Headers,
-                    Sender = e.Sender
-                }
-            };
-            Logger.LogTrace($"Received {e.Event} message from stream with id {e.MessageIdentifier}");
-            Open?.GetInvocationList().ToList().ForEach(del =>
-            {
-                try
-                {
-                    del.DynamicInvoke(Spigot.Settings.StreamFactory(), raisedEvent);
-                }
-                catch (Exception)
-                {
-                    //Log
-                }
-            });
-        }
-    }
-
-    public static class Spigot
-    {
-        internal static SpigotSettings Settings = new SpigotSettings();
-        private static readonly ConcurrentDictionary<string, Action<EventArgs>> Knobs = new ConcurrentDictionary<string, Action<EventArgs>>();
-        private static bool _initialized;
-        private static ILogger Logger;
+        private bool _initialized;
+        internal ISpigotSerializer Serializer;
+        internal ISpigotStream Stream;
+        internal string ApplicationName { get; set; }
+        internal Action<Envelope> AfterReceive { get; set; }
+        internal Resilience Resilience { get; set; }
+        internal Action<Envelope> BeforeSend { get; set; }
+        internal Guid InstanceIdentifier { get; set; }
+        internal JsonEventFormatter EnvelopeFormatter = new JsonEventFormatter();
 
         /// <summary>
         /// Allows for the configuration of the Spigot via an instance of <see cref="SpigotSettings"/>
         /// </summary>
-        /// <param name="settingsBuilder">A delegate that will pass an instance of <see cref="SpigotSettings"/> with default values that can be overwritten by the implementer</param>
-        public static void Setup(Action<SpigotSettings> settingsBuilder)
+        internal void Setup(ISpigotBuilder builder)
         {
             if (_initialized)
             {
-                Settings = new SpigotSettings();
-                Settings.StreamFactory().DataArrived -= Spigot_DataArrived;
-                Logger?.LogWarning("Spigot Settings were already configured and settings are being overwritten");
+                _logger.LogInformation("Unbinding previous spigot configuration for new settings");
+                Stream.DataArrived -= Spigot_DataArrived;
+
+                Stream = null;
+                AfterReceive = null;
+                BeforeSend = null;
+                InstanceIdentifier = Guid.Empty;
+                ApplicationName = string.Empty;
+                Resilience = null;
             }
 
-            settingsBuilder(Settings);
-            Settings.StreamFactory().DataArrived += Spigot_DataArrived;
+            AfterReceive = builder.AfterReceive;
+            BeforeSend = builder.BeforeSend;
+            InstanceIdentifier = builder.InstanceIdentifier;
+            ApplicationName = builder.ApplicationName;
+            Resilience = builder.Resilience ?? new Resilience();
             _initialized = true;
+            builder.Services.AddSingleton(this);
+            var provider = builder.Services.BuildServiceProvider();
+            Stream = provider.GetService<ISpigotStream>() ?? new LocalStream();
+            Serializer = provider.GetService<ISpigotSerializer>() ?? new DefaultJsonSerializer();
+            Stream.DataArrived += Spigot_DataArrived;
+            foreach (var knobType in builder.Knobs)
+            {
+                var knob = provider.GetService(knobType) as Knob;
+                builder.Services.AddSingleton(knob);
+                knob?.Register();
+            }
         }
 
-        internal static void Register(Type type, Action<EventArgs> spigotCallback)
+        internal void Register<T>(Knob<T> knob) where T : class, new()
         {
             if (!_initialized)
             {
-                Setup(w => { /*Take the defaults*/ });
-
+                throw new NotSupportedException(
+                    "Spigot has not been initialized. Use the AddSpigot extension method on IServiceCollection");
             }
 
-            if (Logger == null)
+            var typeName = typeof(T).Name;
+            Knobs[typeName] = message =>
             {
-                Logger = Settings.LoggerFactory.CreateLogger(typeof(Spigot));
-            }
-            Knobs[type.Name] = spigotCallback;
-            Logger.LogTrace("Spigot Callback Registered for {0}", type.Name);
+                if (!(message is Envelope arrived)) return;
+                knob.HandleMessage(arrived);
+            };
+            _logger.LogTrace($"Spigot Callback Registered for {typeName}");
         }
 
-        private static void Spigot_DataArrived(object sender, byte[] e)
+        private void Spigot_DataArrived(object sender, byte[] e)
         {
-            var envelope = Settings.SerializerFactory().Deserialize<Envelope>(e);
-            Knobs[envelope.Event].Invoke(envelope);
+            var envelope = EnvelopeFormatter.DecodeStructuredEvent(e, null);
+            Knobs[envelope.Type].Invoke(envelope);
         }
     }
 }

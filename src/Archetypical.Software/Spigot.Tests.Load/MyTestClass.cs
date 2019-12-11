@@ -1,4 +1,4 @@
-﻿namespace Spigot.LoadTests
+﻿namespace Spigot.Tests.Load
 {
     public class MyTestClass
     {

@@ -11,13 +11,10 @@ namespace Archetypical.Software.Spigot
         /// Metadata about the sender <see cref="Sender"/>
         /// </summary>
         public Sender Sender { get; set; }
-         
 
         /// <summary>
         /// Additional headers sent by the <see cref="Sender"/>
         /// </summary>
-        public Headers  Headers { get; set;}
+        public IDictionary<string, object> Headers { get; set; }
     }
-
-       
 }

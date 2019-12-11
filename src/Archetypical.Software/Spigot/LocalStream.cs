@@ -15,5 +15,9 @@ namespace Archetypical.Software.Spigot
 
         /// <inheritdoc />
         public event EventHandler<byte[]> DataArrived;
+
+        public void Dispose()
+        {
+        }
     }
 }

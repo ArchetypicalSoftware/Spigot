@@ -1,7 +1,7 @@
-﻿using System;
-using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Running;
+using System;
 
-namespace Spigot.LoadTests
+namespace Spigot.Tests.Load
 {
     internal class Program
     {
@@ -9,7 +9,6 @@ namespace Spigot.LoadTests
         {
             var summary = BenchmarkRunner.Run<Spigots>();
             var x = summary;
-            Console.ReadKey();
         }
     }
 }
