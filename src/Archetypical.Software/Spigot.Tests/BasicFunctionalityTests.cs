@@ -2,6 +2,9 @@
 using System.Diagnostics;
 using System.Threading;
 using Archetypical.Software.Spigot;
+using Archetypical.Software.Spigot.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,6 +14,9 @@ namespace Spigot.Tests
     public class BasicFunctionalityTests
     {
         private ILoggerFactory factory;
+        private IServiceCollection services;
+        private IConfiguration config;
+        private const string expected = "Pre-sending Header Value";
 
         public BasicFunctionalityTests(ITestOutputHelper outputHelper)
         {
@@ -18,10 +24,17 @@ namespace Spigot.Tests
             factory.AddProvider(new XunitLoggerProvider(outputHelper));
 
             Debug.Listeners.Add(new DefaultTraceListener());
-            Archetypical.Software.Spigot.Spigot.Setup(settings =>
+            services = new ServiceCollection();
+            config = new ConfigurationBuilder().Build();
+            var builder = services.AddSpigot(config, settings =>
             {
-                settings.AddLoggerFactory(factory);
+                settings.BeforeSend = env =>
+                {
+                    env.Headers.Add(new Header("Test", expected));
+                };
             });
+            builder.LoggerFactory = factory;
+            builder.Build();
         }
 
         [Fact]
@@ -145,14 +158,6 @@ namespace Spigot.Tests
         [Fact]
         public void Pre_And_Post_Handlers_Work_As_Expected()
         {
-            var expected = Guid.NewGuid().ToString();
-            Archetypical.Software.Spigot.Spigot.Setup(settings =>
-            {
-                settings.BeforeSend = env =>
-{
-env.Headers.Add(new Header("Test", expected));
-};
-            });
             var testNumber = 600;
 
             void OnSpigotOnOpen(object s, EventArrived<SimpleClass1> e)
@@ -182,14 +187,7 @@ env.Headers.Add(new Header("Test", expected));
         [Fact]
         public void Serialization_And_Deserialization_Work_As_Expected()
         {
-            var expected = Guid.NewGuid().ToString();
-            Archetypical.Software.Spigot.Spigot.Setup(settings =>
-            {
-                settings.BeforeSend = env =>
-                {
-                    env.Headers.Add(new Header("Test", expected));
-                };
-            });
+            var expected = "Serialized Values";
 
             var testNumber = 700;
             var complexClass = new ComplexClass(testNumber);

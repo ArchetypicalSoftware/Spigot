@@ -1,7 +1,7 @@
 ﻿using System;
 using BenchmarkDotNet.Running;
 
-namespace Spigot.LoadTests
+namespace Spigot.Tests.Load
 {
     internal class Program
     {

@@ -2,16 +2,27 @@
 using System.Linq;
 using System.Threading;
 using Archetypical.Software.Spigot;
+using Archetypical.Software.Spigot.Extensions;
 using BenchmarkDotNet.Attributes;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Spigot.LoadTests
+namespace Spigot.Tests.Load
 {
-    [ClrJob]
+    [SimpleJob(runtimeMoniker: BenchmarkDotNet.Jobs.RuntimeMoniker.NetCoreApp22)]
+    [SimpleJob(runtimeMoniker: BenchmarkDotNet.Jobs.RuntimeMoniker.Net472)]
     [RankColumn, AllStatisticsColumn, IterationsColumn]
     [MemoryDiagnoser]
     [MarkdownExporter, HtmlExporter, RPlotExporter, XmlExporter]
     public class Spigots
     {
+        public Spigots()
+        {
+            var services = new ServiceCollection();
+            var config = new ConfigurationBuilder().Build();
+            services.AddSpigot(config, settings => { }).Build();
+        }
+
         [Params(1, 10, 20, 30, 40, 50, 100)]
         public int Iterations { get; set; } = 100;
 

@@ -9,41 +9,16 @@ namespace Archetypical.Software.Spigot
     /// </summary>
     public class SpigotSettings
     {
-        internal Func<ISpigotSerializer> SerializerFactory;
-        internal Func<ISpigotStream> StreamFactory;
-        internal ILoggerFactory LoggerFactory;
+        
         /// <inheritdoc />
         public SpigotSettings()
         {
             Resilience = new Resilience();
-            AddSerializer(new DefaultDataContractSerializer());
-            AddStream(new LocalStream());
+             
             ApplicationName = Environment.CommandLine;
-            LoggerFactory = new LoggerFactory();
         }
 
 
-        public void AddLoggerFactory(ILoggerFactory loggerFactory)
-        {
-            LoggerFactory = loggerFactory;
-        }
-        /// <summary>
-        /// Add a custom implementation of an <see cref="ISpigotSerializer"/>
-        /// </summary>
-        /// <param name="serializer">An implementation of <see cref="ISpigotSerializer"/></param>
-        public void AddSerializer(ISpigotSerializer serializer)
-        {
-            SerializerFactory = () => serializer;
-        }
-
-        /// <summary>
-        /// Add a custom implementation of an <see cref="ISpigotStream"/>
-        /// </summary>
-        /// <param name="stream">An implementation of <see cref="ISpigotStream"/></param>
-        public void AddStream(ISpigotStream stream)
-        {
-            StreamFactory = () => stream;
-        }
 
         /// <summary>
         /// The name of the current application.
