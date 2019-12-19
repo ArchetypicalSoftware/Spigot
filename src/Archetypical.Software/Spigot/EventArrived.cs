@@ -10,6 +10,7 @@
         /// The value from the sender
         /// </summary>
         public T EventData { get; set; }
+
         /// <summary>
         /// The Senders <see cref="Context"/>
         /// </summary>

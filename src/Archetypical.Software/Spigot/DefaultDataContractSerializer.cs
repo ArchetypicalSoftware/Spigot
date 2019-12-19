@@ -5,9 +5,8 @@ using System.Runtime.Serialization;
 
 namespace Archetypical.Software.Spigot
 {
-
     /// <summary>
-    /// A simple Data contract serializer 
+    /// A simple Data contract serializer
     /// </summary>
     internal class DefaultDataContractSerializer : ISpigotSerializer
     {
@@ -39,6 +38,10 @@ namespace Archetypical.Software.Spigot
                 serializer.WriteObject(stream, dataToSerialize);
                 return stream.ToArray();
             }
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

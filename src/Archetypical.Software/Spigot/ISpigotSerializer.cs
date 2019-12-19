@@ -1,14 +1,16 @@
-﻿namespace Archetypical.Software.Spigot
+﻿using System;
+
+namespace Archetypical.Software.Spigot
 {
     /// <summary>
     /// Allows for the serialization and deserialization of types.
     /// Each implementation should handle its own optimization and fault tolerance.
     /// </summary>
     /// <remarks>Types of T may not be available at compile-time so special handling will need to be done for any attribute based configuration.</remarks>
-    public interface ISpigotSerializer
+    public interface ISpigotSerializer : IDisposable
     {
         /// <summary>
-        /// Serializes the class to a byte array 
+        /// Serializes the class to a byte array
         /// </summary>
         /// <typeparam name="T">The Type to be serialized. Must be a class and have a parameter-less constructor.</typeparam>
         /// <param name="dataToSerialize">The instance of the class to serialize</param>

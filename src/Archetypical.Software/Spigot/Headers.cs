@@ -6,7 +6,7 @@ namespace Archetypical.Software.Spigot
     /// <summary>
     /// A collection of headers sent with the data
     /// </summary>
-    public class Headers:List<Header>
+    public class Headers : List<Header>
     {
         /// <summary>
         /// A simple index by name
@@ -17,6 +17,5 @@ namespace Archetypical.Software.Spigot
         {
             get { return this.FirstOrDefault(x => x.Name == name); }
         }
-
     }
 }

@@ -1,16 +1,18 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using Xunit.Abstractions;
 
 namespace Spigot.Tests
 {
-    class XunitLoggerProvider :ILoggerProvider
+    internal class XunitLoggerProvider : ILoggerProvider
     {
         private ITestOutputHelper _outputHelper;
+
         public XunitLoggerProvider(ITestOutputHelper outputHelper)
         {
             _outputHelper = outputHelper;
         }
+
         public void Dispose()
         {
             throw new NotImplementedException();

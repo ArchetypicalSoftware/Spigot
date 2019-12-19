@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
 namespace Spigot.Tests
 {
-    class XunitLogger: ILogger
+    internal class XunitLogger : ILogger
     {
         private ITestOutputHelper _outputHelper;
+
         public XunitLogger(ITestOutputHelper outputHelper)
         {
             _outputHelper = outputHelper;

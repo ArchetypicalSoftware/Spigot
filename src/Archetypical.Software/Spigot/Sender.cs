@@ -2,7 +2,6 @@
 
 namespace Archetypical.Software.Spigot
 {
-
     /// <summary>
     /// Information about the sending application
     /// </summary>
@@ -12,6 +11,7 @@ namespace Archetypical.Software.Spigot
         /// The Process Identifier <see cref="System.Environment.CurrentManagedThreadId"/> of the sender
         /// </summary>
         public int ProcessId { get; set; }
+
         /// <summary>
         /// The Senders friendly name as is set in <see cref="SpigotSettings.ApplicationName"/>
         /// </summary>

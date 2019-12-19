@@ -1,5 +1,5 @@
-﻿using System;
-using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Running;
+using System;
 
 namespace Spigot.Tests.Load
 {
@@ -9,7 +9,6 @@ namespace Spigot.Tests.Load
         {
             var summary = BenchmarkRunner.Run<Spigots>();
             var x = summary;
-            Console.ReadKey();
         }
     }
 }

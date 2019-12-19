@@ -5,9 +5,9 @@ namespace Archetypical.Software.Spigot
     /// <summary>
     /// Represents a simple generic data stream that can be used to send and receive data
     /// The implementation should handle any additional enveloping, persistence and fault tolerance
-    /// needed. 
+    /// needed.
     /// </summary>
-    public interface ISpigotStream
+    public interface ISpigotStream : IDisposable
     {
         /// <summary>
         /// Tries to send an array of bytes over the stream
