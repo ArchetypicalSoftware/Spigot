@@ -1,4 +1,6 @@
-﻿namespace Archetypical.Software.Spigot
+﻿using System.Collections.Generic;
+
+namespace Archetypical.Software.Spigot
 {
     /// <summary>
     /// The sending context of the event being sent
@@ -13,6 +15,6 @@
         /// <summary>
         /// Additional headers sent by the <see cref="Sender"/>
         /// </summary>
-        public Headers Headers { get; set; }
+        public IDictionary<string, object> Headers { get; set; }
     }
 }

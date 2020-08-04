@@ -22,18 +22,6 @@ namespace Archetypical.Software.Spigot.Extensions
         IConfiguration Configuration { get; set; }
 
         /// <summary>
-        /// The currently configured <see cref="ISpigotSerializer"/>
-        /// This is an extension point for developers to control the serializer they want to inject in this instance
-        /// </summary>
-        ISpigotSerializer Serializer { get; set; }
-
-        /// <summary>
-        /// The currently configured <see cref="ISpigotStream"/>
-        /// This is an extension point for developers to control the stream they want to inject in this instance
-        /// </summary>
-        ISpigotStream Stream { get; set; }
-
-        /// <summary>
         /// The name of the current application.
         /// </summary>
         /// <remarks>Set this to indicate which business-friendly product is hosting these spigots</remarks>

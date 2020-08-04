@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CloudNative.CloudEvents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,7 +17,7 @@ namespace Archetypical.Software.Spigot.Extensions
         public IConfiguration Configuration { get; set; }
 
         /// <inheritdoc />
-        public ISpigotSerializer Serializer { get; set; } = new DefaultDataContractSerializer();
+        public ICloudEventFormatter Serializer { get; set; } = new JsonEventFormatter();
 
         /// <inheritdoc />
         public ISpigotStream Stream { get; set; } = new LocalStream();

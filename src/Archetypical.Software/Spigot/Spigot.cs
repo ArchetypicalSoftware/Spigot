@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Runtime.CompilerServices;
+using CloudNative.CloudEvents;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: InternalsVisibleTo("Spigot.LoadTests")]
@@ -17,8 +19,8 @@ namespace Archetypical.Software.Spigot
     {
         private readonly ILogger<Spigot> _logger;
 
-        internal readonly ConcurrentDictionary<string, Action<EventArgs>> Knobs =
-            new ConcurrentDictionary<string, Action<EventArgs>>();
+        internal readonly ConcurrentDictionary<string, Action<CloudEvent>> Knobs =
+            new ConcurrentDictionary<string, Action<CloudEvent>>();
 
         public Spigot(ILogger<Spigot> logger)
         {
@@ -33,6 +35,7 @@ namespace Archetypical.Software.Spigot
         internal Resilience Resilience { get; set; }
         internal Action<Envelope> BeforeSend { get; set; }
         internal Guid InstanceIdentifier { get; set; }
+        internal JsonEventFormatter EnvelopeFormatter = new JsonEventFormatter();
 
         /// <summary>
         /// Allows for the configuration of the Spigot via an instance of <see cref="SpigotSettings"/>
@@ -43,7 +46,7 @@ namespace Archetypical.Software.Spigot
             {
                 _logger.LogInformation("Unbinding previous spigot configuration for new settings");
                 Stream.DataArrived -= Spigot_DataArrived;
-                Serializer = null;
+
                 Stream = null;
                 AfterReceive = null;
                 BeforeSend = null;
@@ -52,17 +55,17 @@ namespace Archetypical.Software.Spigot
                 Resilience = null;
             }
 
-            Serializer = builder.Serializer;
-            Stream = builder.Stream;
-            Stream.DataArrived += Spigot_DataArrived;
             AfterReceive = builder.AfterReceive;
             BeforeSend = builder.BeforeSend;
             InstanceIdentifier = builder.InstanceIdentifier;
             ApplicationName = builder.ApplicationName;
             Resilience = builder.Resilience ?? new Resilience();
             _initialized = true;
-            builder.Services.AddSingleton<Spigot>(this);
+            builder.Services.AddSingleton(this);
             var provider = builder.Services.BuildServiceProvider();
+            Stream = provider.GetService<ISpigotStream>() ?? new LocalStream();
+            Serializer = provider.GetService<ISpigotSerializer>() ?? new DefaultJsonSerializer();
+            Stream.DataArrived += Spigot_DataArrived;
             foreach (var knobType in builder.Knobs)
             {
                 var knob = provider.GetService(knobType) as Knob;
@@ -90,8 +93,8 @@ namespace Archetypical.Software.Spigot
 
         private void Spigot_DataArrived(object sender, byte[] e)
         {
-            var envelope = Serializer.Deserialize<Envelope>(e);
-            Knobs[envelope.Event].Invoke(envelope);
+            var envelope = EnvelopeFormatter.DecodeStructuredEvent(e, null);
+            Knobs[envelope.Type].Invoke(envelope);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Archetypical.Software.Spigot
 {
@@ -7,6 +8,23 @@ namespace Archetypical.Software.Spigot
     /// </summary>
     public class Sender
     {
+        public Sender(Uri cloudEventSource)
+        {
+            var split = cloudEventSource.ToString().Split(':');
+            int processId;
+            Guid instanceGuid;
+            if (split.Length != 3 || !split.First().StartsWith("spigot-") || !int.TryParse(split[0].Substring(7), out processId) || !Guid.TryParse(split[2], out instanceGuid))
+            {
+                Name = "Unknown sender.";
+            }
+            else
+            {
+                ProcessId = processId;
+                Name = split[1];
+                InstanceIdentifier = instanceGuid;
+            }
+        }
+
         /// <summary>
         /// The Process Identifier <see cref="System.Environment.CurrentManagedThreadId"/> of the sender
         /// </summary>

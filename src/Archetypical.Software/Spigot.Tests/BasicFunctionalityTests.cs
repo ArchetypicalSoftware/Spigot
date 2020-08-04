@@ -108,7 +108,7 @@ namespace Spigot.Tests
                 .AddKnob<SimpleHeaderValidator, SimpleClass1>()
                 .AddBeforeSend(env =>
                 {
-                    env.Headers.Add(new Header("Test", expected));
+                    env.GetAttributes().Add("Test", expected);
                 })
                 .Build();
             var provider = services.BuildServiceProvider();
@@ -265,7 +265,7 @@ namespace Spigot.Tests
 
             protected override void HandleMessage(EventArrived<SimpleClass1> message)
             {
-                if (message.EventData.Index == _testnumber.Number && message.Context.Headers["Test"]?.Value == _testnumber.ExpectedHeader)
+                if (message.EventData.Index == _testnumber.Number && message.Context.Headers["Test"].ToString() == _testnumber.ExpectedHeader)
                 {
                     _testnumber.EventsReceived++;
                 }

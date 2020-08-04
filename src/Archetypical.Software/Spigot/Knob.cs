@@ -21,7 +21,7 @@ namespace Archetypical.Software.Spigot
         public override void HandleMessage(Envelope message)
         {
             if (!(message is Envelope arrived)) return;
-            _logger.LogTrace("Envelope of type [{0}] arrived with id {1}", arrived.Event, arrived.MessageIdentifier);
+            _logger.LogTrace("Envelope of type [{0}] arrived with id {1}", arrived.Type, arrived.Id);
             Dispatch(arrived);
         }
 
@@ -30,14 +30,14 @@ namespace Archetypical.Software.Spigot
             _spigot.AfterReceive?.Invoke(e);
             var message = new EventArrived<T>
             {
-                EventData = _spigot.Serializer.Deserialize<T>(e.SerializedEventData),
+                EventData = _spigot.Serializer.Deserialize<T>(e.Data as byte[]),
                 Context = new Context
                 {
-                    Headers = e.Headers,
-                    Sender = e.Sender
+                    Headers = e.GetAttributes(),
+                    Sender = new Sender(e.Source)
                 }
             };
-            _logger.LogTrace($"Received {e.Event} message from stream with id {e.MessageIdentifier}");
+            _logger.LogTrace($"Received {e.Type} message from stream with id {e.Id}");
 
             try
             {

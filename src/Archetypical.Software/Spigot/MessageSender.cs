@@ -1,4 +1,6 @@
 ﻿using System;
+using CloudNative.CloudEvents;
+using CloudNative.CloudEvents.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Archetypical.Software.Spigot
@@ -22,24 +24,23 @@ namespace Archetypical.Software.Spigot
         {
             var wrapper = new Envelope
             {
-                SerializedEventData = _spigot.Serializer.Serialize(eventData),
-                Event = typeof(T).Name,
-                FQN = typeof(T).FullName,
-                MessageIdentifier = Guid.NewGuid(),
-                Sender = new Sender
-                {
-                    ProcessId = Environment.CurrentManagedThreadId,
-                    Name = _spigot.ApplicationName,
-                    InstanceIdentifier = _spigot.InstanceIdentifier
-                }
+                Data = _spigot.Serializer.Serialize(eventData),
+                DataContentType = _spigot.Serializer.ContentType,
+                Type = typeof(T).Name,
+                Subject = typeof(T).FullName,
+                Source = new Uri
+                (
+                    $"urn:spigot-{Environment.CurrentManagedThreadId}:{_spigot.ApplicationName}:{_spigot.InstanceIdentifier}"
+                )
             };
             _spigot.BeforeSend?.Invoke(wrapper);
-            _logger.LogTrace("Sending [{0}] with id {1}", wrapper.Event, wrapper.MessageIdentifier);
+            _logger.LogTrace("Sending [{0}] with id {1}", wrapper.Type, wrapper.Id);
 
             //Send it to all listeners in the same process space
             _spigot.Knobs[typeof(T).Name]?.Invoke(wrapper);
 
-            var bytes = _spigot.Serializer.Serialize(wrapper);
+            var contents = new CloudEventContent(wrapper, ContentMode.Structured, new JsonEventFormatter());
+            var bytes = contents.ReadAsByteArrayAsync().GetAwaiter().GetResult();
 
             _spigot.Resilience.Sending.Execute(() =>
             {
