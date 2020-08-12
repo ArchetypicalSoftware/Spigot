@@ -1,7 +1,8 @@
 # Spigot
 ### Your tap into custom event streams from any source
  
-[![Build status](https://ci.appveyor.com/api/projects/status/u4xwybm34bs2kvla/branch/master?svg=true)](https://ci.appveyor.com/project/ewassef/spigot/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/xm19400akpjdb0uy/branch/master?svg=true)](https://ci.appveyor.com/project/ArchetypicalSoftware/spigot/branch/master)
+
 
 Spigot allows you to simply connect into any event stream to pull in and publish strongly typed objects rather than simple strings.
 
@@ -22,27 +23,37 @@ This pattern provides greater network scalability and a more dynamic network top
 
 [<i> Wikipedia definition of Publish–subscribe pattern</i>](https://en.wikipedia.org/wiki/Publish–subscribe_pattern)
 
-Subscribing to an event is as easy as :
+Subscribing to an event is as easy as creating a Knob:
 
 ```csharp
-...
- void OnSpigotOnOpen(object sender, EventArrived<MessageICareAbout> e)
+ public class ComplexClassHandler : Knob<ComplexClass>
+        {
+            public ComplexClassHandler(EventNumber number, Archetypical.Software.Spigot.Spigot spigot, ILogger<Knob<ComplexClass>> logger) : base(spigot, logger)
             {
-                MessageICareAbout messageFromSomePublisher = e.EventData; // This is a strongly typed instance of your message class
-                // messageFromSomePublisher.Propery1 etc
-                // ...do work
+                //stuff
             }
 
-Spigot<MessageICareAbout>.Open += OnSpigotOnOpen;
-
-...
+            protected override void HandleMessage(EventArrived<ComplexClass> message)
+            {
+                //handle
+            }
+        }
+```
+Then registering that Knob
+```csharp
+                services
+                .AddLogging()
+                .AddSpigot(config)
+                .AddKnob<ComplexClassHandler, ComplexClass>()
 ```
 
-Unsubscribing is just as simple:
+Sending is just as simple:
 
 ```csharp
 
-    Spigot<MessageICareAbout>.Open -= OnSpigotOnOpen;
+            var complexSender = provider.GetService<MessageSender<ComplexClass>>();
+                
+            complexSender.Send(new ComplexClass(testNumber));
 
 ```
 
