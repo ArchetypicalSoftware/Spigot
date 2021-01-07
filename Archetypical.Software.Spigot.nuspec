@@ -5,6 +5,7 @@
         <version>$version$</version>
         <authors>Archetypical.Software</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<iconUrl>https://lh4.googleusercontent.com/6LW8mKOegkdeiGAuEOUE3_jLDm4eI0XLImLw4ntXLSj7t2X4688lIPE8zQTrY_pUmMXLneuctEzbzaMjIizR=w1920-h948</iconUrl>
         <description>
            Spigot is a transparent pub sub mechanism that layers streams and serializers on top of a familiar event based system. You can create a spigot to listen to any concrete serializable type and attach any number of event handlers to receive the message. Using the same spigot, you can 
            broadcast any concrete serializable type to any listeners listening on the same stream. 

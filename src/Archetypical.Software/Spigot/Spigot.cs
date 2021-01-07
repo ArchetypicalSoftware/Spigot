@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using CloudNative.CloudEvents;
@@ -29,7 +30,7 @@ namespace Archetypical.Software.Spigot
 
         private bool _initialized;
         internal ISpigotSerializer Serializer;
-        internal ISpigotStream Stream;
+        internal IEnumerable<ISpigotStream> Streams;
         internal string ApplicationName { get; set; }
         internal Action<Envelope> AfterReceive { get; set; }
         internal Resilience Resilience { get; set; }
@@ -45,9 +46,11 @@ namespace Archetypical.Software.Spigot
             if (_initialized)
             {
                 _logger.LogInformation("Unbinding previous spigot configuration for new settings");
-                Stream.DataArrived -= Spigot_DataArrived;
-
-                Stream = null;
+                foreach (var stream in Streams)
+                {
+                    stream.DataArrived -= Spigot_DataArrived;
+                }
+                Streams = null;
                 AfterReceive = null;
                 BeforeSend = null;
                 InstanceIdentifier = Guid.Empty;
@@ -63,9 +66,10 @@ namespace Archetypical.Software.Spigot
             _initialized = true;
             builder.Services.AddSingleton(this);
             var provider = builder.Services.BuildServiceProvider();
-            Stream = provider.GetService<ISpigotStream>() ?? new LocalStream();
+            Streams = provider.GetServices<ISpigotStream>() ?? new[] { new LocalStream() };
             Serializer = provider.GetService<ISpigotSerializer>() ?? new DefaultJsonSerializer();
-            Stream.DataArrived += Spigot_DataArrived;
+            foreach (var stream in Streams)
+                stream.DataArrived += Spigot_DataArrived;
             foreach (var knobType in builder.Knobs)
             {
                 var knob = provider.GetService(knobType) as Knob;

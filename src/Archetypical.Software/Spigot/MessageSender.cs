@@ -42,15 +42,16 @@ namespace Archetypical.Software.Spigot
             var contents = new CloudEventContent(wrapper, ContentMode.Structured, new JsonEventFormatter());
             var bytes = contents.ReadAsByteArrayAsync().GetAwaiter().GetResult();
 
-            _spigot.Resilience.Sending.Execute(() =>
-            {
-                _logger.LogTrace("Sending using resilience.");
-                var result = _spigot.Stream?.TrySend(bytes);
-                if (!result.GetValueOrDefault())
+            foreach (var stream in _spigot.Streams)
+                _spigot.Resilience.Sending.Execute(() =>
                 {
-                    throw new Exception("Sending exception");
-                }
-            });
+                    _logger.LogTrace("Sending using resilience.");
+                    var result = stream?.TrySend(bytes);
+                    if (!result.GetValueOrDefault())
+                    {
+                        throw new Exception("Sending exception");
+                    }
+                });
         }
     }
 }
