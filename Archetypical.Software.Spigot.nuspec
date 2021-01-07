@@ -6,7 +6,6 @@
         <authors>Archetypical.Software</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <iconUrl>https://lh4.googleusercontent.com/6LW8mKOegkdeiGAuEOUE3_jLDm4eI0XLImLw4ntXLSj7t2X4688lIPE8zQTrY_pUmMXLneuctEzbzaMjIizR=w1920-h948</iconUrl>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <license type="expression">LGPL-3.0-or-later</license>
         <repository type="git" url="https://github.com/ArchetypicalSoftware/Spigot"></repository>
         <projectUrl>https://archetypical.software/Product/Detail/Spigot</projectUrl>
