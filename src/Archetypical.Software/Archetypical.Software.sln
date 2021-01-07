@@ -11,14 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spigot.Tests", "Spigot.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spigot.Tests.Load", "Spigot.Tests.Load\Spigot.Tests.Load.csproj", "{2D33C08E-40C4-4B13-8AA9-EF4EB9D49A84}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spigot.Samples", "Spigot.Samples\Spigot.Samples.csproj", "{104D8608-AEBC-493C-8D80-BFA011C7C281}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{4DC52410-E1CE-4354-A514-BBCE7F84B505}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spigot.Samples.EventualConsistency", "Spigot.Samples.EventualConsistency\Spigot.Samples.EventualConsistency.csproj", "{D2F3AC0A-BEB6-4EFB-B35B-1DC38DFE4A37}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spigot.Samples.Common", "Spigot.Samples.Common\Spigot.Samples.Common.csproj", "{8BE92B25-8549-4D1C-9B70-C36181248320}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,18 +29,6 @@ Global
 		{2D33C08E-40C4-4B13-8AA9-EF4EB9D49A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D33C08E-40C4-4B13-8AA9-EF4EB9D49A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D33C08E-40C4-4B13-8AA9-EF4EB9D49A84}.Release|Any CPU.Build.0 = Release|Any CPU
-		{104D8608-AEBC-493C-8D80-BFA011C7C281}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{104D8608-AEBC-493C-8D80-BFA011C7C281}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{104D8608-AEBC-493C-8D80-BFA011C7C281}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{104D8608-AEBC-493C-8D80-BFA011C7C281}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D2F3AC0A-BEB6-4EFB-B35B-1DC38DFE4A37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2F3AC0A-BEB6-4EFB-B35B-1DC38DFE4A37}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D2F3AC0A-BEB6-4EFB-B35B-1DC38DFE4A37}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D2F3AC0A-BEB6-4EFB-B35B-1DC38DFE4A37}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8BE92B25-8549-4D1C-9B70-C36181248320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BE92B25-8549-4D1C-9B70-C36181248320}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BE92B25-8549-4D1C-9B70-C36181248320}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BE92B25-8549-4D1C-9B70-C36181248320}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,9 +36,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1D2D406B-8538-41B8-B99D-F971027C520C} = {DF4675E5-8B96-4EF9-9380-369B9159A57C}
 		{2D33C08E-40C4-4B13-8AA9-EF4EB9D49A84} = {DF4675E5-8B96-4EF9-9380-369B9159A57C}
-		{104D8608-AEBC-493C-8D80-BFA011C7C281} = {4DC52410-E1CE-4354-A514-BBCE7F84B505}
-		{D2F3AC0A-BEB6-4EFB-B35B-1DC38DFE4A37} = {4DC52410-E1CE-4354-A514-BBCE7F84B505}
-		{8BE92B25-8549-4D1C-9B70-C36181248320} = {4DC52410-E1CE-4354-A514-BBCE7F84B505}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7C89E520-A431-470B-896F-F0A2B04BE761}
