@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Microsoft.Extensions.Logging;
+using CloudNative.CloudEvents;
 
 namespace Archetypical.Software.Spigot.Extensions
 {
@@ -42,35 +42,66 @@ namespace Archetypical.Software.Spigot.Extensions
             return src;
         }
 
-        public static ISpigotBuilder AddBeforeSend(this ISpigotBuilder src, Action<Envelope> beforeSendAction)
+        /// <summary>
+        /// Allows for intercepting the message before sending. This can be used for advanced scenarios
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="beforeSendAction"></param>
+        /// <returns></returns>
+        public static ISpigotBuilder AddBeforeSend(this ISpigotBuilder src, Action<CloudEvent> beforeSendAction)
         {
             src.BeforeSend = beforeSendAction;
             return src;
         }
 
-        public static ISpigotBuilder AddAfterReceive(this ISpigotBuilder src, Action<Envelope> afterReceiveAction)
+        /// <summary>
+        /// Allows for intercepting the message after receipt but before entering the pipeline
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="afterReceiveAction"></param>
+        /// <returns></returns>
+        public static ISpigotBuilder AddAfterReceive(this ISpigotBuilder src, Action<CloudEvent> afterReceiveAction)
         {
             src.AfterReceive = afterReceiveAction;
             return src;
         }
 
+        /// <summary>
+        /// Assigns a friendly name to the Spigot
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="friendlyName"></param>
+        /// <returns></returns>
         public static ISpigotBuilder WithFriendlyName(this ISpigotBuilder src, string friendlyName)
         {
             src.ApplicationName = friendlyName;
             return src;
         }
 
+        /// <summary>
+        /// Registers a <see cref="Knob"/> to handle messages from Spigot Streams
+        /// </summary>
+        /// <param name="src"></param>
+        /// <typeparam name="TKnob"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static ISpigotBuilder AddKnob<TKnob, T>(this ISpigotBuilder src) where TKnob : Knob<T> where T : class, new()
         {
-            var name = typeof(TKnob).FullName;
             src.Services.AddSingleton<TKnob>();
             src.Knobs.Add(typeof(TKnob));
             return src;
         }
 
+        /// <summary>
+        /// Registers a <see cref="Knob"/> to handle messages from Spigot Streams
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="instance"></param>
+        /// <typeparam name="TKnob"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static ISpigotBuilder AddKnob<TKnob, T>(this ISpigotBuilder src, TKnob instance) where TKnob : Knob<T> where T : class, new()
         {
-            var name = typeof(TKnob).FullName;
             src.Services.AddSingleton(instance);
             src.Knobs.Add(typeof(TKnob));
             return src;

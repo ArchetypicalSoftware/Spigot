@@ -23,6 +23,7 @@ namespace Archetypical.Software.Spigot
         internal readonly ConcurrentDictionary<string, Action<CloudEvent>> Knobs =
             new ConcurrentDictionary<string, Action<CloudEvent>>();
 
+        /// <inheritdoc />
         public Spigot(ILogger<Spigot> logger)
         {
             _logger = logger;
@@ -31,15 +32,25 @@ namespace Archetypical.Software.Spigot
         private bool _initialized;
         internal ISpigotSerializer Serializer;
         internal IEnumerable<ISpigotStream> Streams;
-        internal string ApplicationName { get; set; }
-        internal Action<Envelope> AfterReceive { get; set; }
+
+        /// <summary>
+        /// The friendly name set with <see cref="SpigotBuilder.ApplicationName"/>
+        /// </summary>
+        public string ApplicationName { get; internal set; }
+
+        internal Action<CloudEvent> AfterReceive { get; set; }
         internal Resilience Resilience { get; set; }
-        internal Action<Envelope> BeforeSend { get; set; }
-        internal Guid InstanceIdentifier { get; set; }
+        internal Action<CloudEvent> BeforeSend { get; set; }
+
+        /// <summary>
+        /// A unique identifier for each instance of spigot
+        /// </summary>
+        public Guid InstanceIdentifier { get; internal set; }
+
         internal JsonEventFormatter EnvelopeFormatter = new JsonEventFormatter();
 
         /// <summary>
-        /// Allows for the configuration of the Spigot via an instance of <see cref="SpigotSettings"/>
+        /// Allows for the configuration of the Spigot via an instance of <see cref="ISpigotBuilder"/>
         /// </summary>
         internal void Setup(ISpigotBuilder builder)
         {
@@ -89,8 +100,8 @@ namespace Archetypical.Software.Spigot
             var typeName = typeof(T).Name;
             Knobs[typeName] = message =>
             {
-                if (!(message is Envelope arrived)) return;
-                knob.HandleMessage(arrived);
+                _logger.LogTrace($"Message received of type {message.GetType()}");
+                knob.HandleMessage(message);
             };
             _logger.LogTrace($"Spigot Callback Registered for {typeName}");
         }

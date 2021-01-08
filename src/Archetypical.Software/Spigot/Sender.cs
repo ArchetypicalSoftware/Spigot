@@ -11,16 +11,20 @@ namespace Archetypical.Software.Spigot
         public Sender(Uri cloudEventSource)
         {
             var split = cloudEventSource.ToString().Split(':');
-            int processId;
-            Guid instanceGuid;
-            if (split.Length != 3 || !split.First().StartsWith("spigot-") || !int.TryParse(split[0].Substring(7), out processId) || !Guid.TryParse(split[2], out instanceGuid))
+
+            if (
+                split.Length != 4
+                || split.First() != "urn"
+                || !split[1].StartsWith("spigot-")
+                || !int.TryParse(split[1].Split('-').Last(), out var processId)
+                || !Guid.TryParse(split[3], out var instanceGuid))
             {
-                Name = "Unknown sender.";
+                Name = cloudEventSource.ToString();
             }
             else
             {
                 ProcessId = processId;
-                Name = split[1];
+                Name = split[2];
                 InstanceIdentifier = instanceGuid;
             }
         }
@@ -31,12 +35,12 @@ namespace Archetypical.Software.Spigot
         public int ProcessId { get; set; }
 
         /// <summary>
-        /// The Senders friendly name as is set in <see cref="SpigotSettings.ApplicationName"/>
+        /// The Senders friendly name as is set in <see cref="Spigot.ApplicationName"/>
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// A unique instance identifier to identifier each sender if deployed in a multi-instance environment.See <see cref="SpigotSettings.InstanceIdentifier"/>
+        /// A unique instance identifier to identifier each sender if deployed in a multi-instance environment.See <see cref="Spigot.InstanceIdentifier"/>
         /// </summary>
         public Guid InstanceIdentifier { get; set; }
     }

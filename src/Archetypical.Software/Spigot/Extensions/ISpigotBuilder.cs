@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CloudNative.CloudEvents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,13 +38,13 @@ namespace Archetypical.Software.Spigot.Extensions
         /// The delegate to call before sending data to be serialized by the <see cref="ISpigotSerializer"/> to be sent on the <see cref="ISpigotStream"/>
         /// </summary>
         /// <remarks>This will not provide access to the data but only to the <see cref="Envelope"/> This should only manipulate the <see cref="Headers"/></remarks>
-        Action<Envelope> BeforeSend { get; set; }
+        Action<CloudEvent> BeforeSend { get; set; }
 
         /// <summary>
         /// The delegate to call after receiving the <see cref="Envelope"/> but before sending the data to be deserialized by the <see cref="ISpigotSerializer"/>
         /// </summary>
         /// <remarks>This will not provide access to the data but only to the <see cref="Envelope"/> This should only manipulate the <see cref="Headers"/></remarks>
-        Action<Envelope> AfterReceive { get; set; }
+        Action<CloudEvent> AfterReceive { get; set; }
 
         Resilience Resilience { get; set; }
 

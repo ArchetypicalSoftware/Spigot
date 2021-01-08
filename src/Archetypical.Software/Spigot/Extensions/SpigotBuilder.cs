@@ -29,10 +29,10 @@ namespace Archetypical.Software.Spigot.Extensions
         public Guid InstanceIdentifier { get; } = Guid.NewGuid();
 
         /// <inheritdoc />
-        public Action<Envelope> BeforeSend { get; set; }
+        public Action<CloudEvent> BeforeSend { get; set; }
 
         /// <inheritdoc />
-        public Action<Envelope> AfterReceive { get; set; }
+        public Action<CloudEvent> AfterReceive { get; set; }
 
         /// <inheritdoc />
         public Resilience Resilience { get; set; }

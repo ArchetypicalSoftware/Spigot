@@ -5,7 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Archetypical.Software.Spigot
 {
-    public class MessageSender<T>
+    /// <summary>
+    /// Generic class that allows the sending of typed data to a stream
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class MessageSender<T> where T : class, new()
     {
         private readonly Spigot _spigot;
         private readonly ILogger<MessageSender<T>> _logger;
@@ -20,9 +24,14 @@ namespace Archetypical.Software.Spigot
         /// Allows you to send an instance of T to the <see cref="ISpigotStream"/>
         /// </summary>
         /// <param name="eventData">The data to be sent over</param>
-        public void Send<T>(T eventData) where T : class, new()
+        public void Send(T eventData)
         {
-            var wrapper = new Envelope
+            var wrapper = new CloudEvent(CloudEventsSpecVersion.Default, new ICloudEventExtension[]
+            {
+                new SamplingExtension(),
+                new DistributedTracingExtension(),
+                new IntegerSequenceExtension()
+            })
             {
                 Data = _spigot.Serializer.Serialize(eventData),
                 DataContentType = _spigot.Serializer.ContentType,

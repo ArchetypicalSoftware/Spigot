@@ -13,16 +13,16 @@ namespace Spigot.Tests
 {
     public class BasicFunctionalityTests
     {
-        private ILoggerFactory factory;
+        private readonly ILoggerFactory _factory;
 
-        private IConfiguration config;
-        private const string expected = "Pre-sending Header Value";
+        private readonly IConfiguration _config;
+        private const string Expected = "Pre-sending Header Value";
 
         public BasicFunctionalityTests(ITestOutputHelper outputHelper)
         {
-            factory = new LoggerFactory();
-            factory.AddProvider(new XunitLoggerProvider(outputHelper));
-            config = new ConfigurationBuilder().Build();
+            _factory = new LoggerFactory();
+            _factory.AddProvider(new XunitLoggerProvider(outputHelper));
+            _config = new ConfigurationBuilder().Build();
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Spigot.Tests
             services
                 .AddLogging()
                 .AddSingleton(counter)
-            .AddSpigot(config)
+            .AddSpigot(_config)
             .AddKnob<SimpleClass1Handler, SimpleClass1>()
             .AddKnob<ComplexClassHandler, ComplexClass>()
                 .Build();
@@ -78,7 +78,7 @@ namespace Spigot.Tests
             services
                 .AddLogging()
                 .AddSingleton(counter)
-                .AddSpigot(config)
+                .AddSpigot(_config)
                 .AddKnob<SimpleClass1Handler, SimpleClass1>()
                 .AddKnob<ComplexClassHandler, ComplexClass>()
                 .Build();
@@ -99,16 +99,16 @@ namespace Spigot.Tests
         {
             var testNumber = 600;
 
-            var counter = new EventNumber(testNumber, expected);
+            var counter = new EventNumber(testNumber, Expected);
             var services = new ServiceCollection();
             services
                 .AddLogging()
                 .AddSingleton(counter)
-                .AddSpigot(config)
+                .AddSpigot(_config)
                 .AddKnob<SimpleHeaderValidator, SimpleClass1>()
                 .AddBeforeSend(env =>
                 {
-                    env.GetAttributes().Add("Test", expected);
+                    env.GetAttributes().Add("Test", Expected);
                 })
                 .Build();
             var provider = services.BuildServiceProvider();
@@ -132,7 +132,7 @@ namespace Spigot.Tests
                 .AddLogging()
                 .AddSingleton(counter)
                 .AddSingleton(cde)
-                .AddSpigot(config)
+                .AddSpigot(_config)
                 .AddKnob<SignalingHandler, SimpleClass1>()
                 .Build();
             var provider = services.BuildServiceProvider();

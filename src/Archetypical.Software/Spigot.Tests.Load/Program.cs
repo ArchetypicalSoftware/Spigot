@@ -5,10 +5,9 @@ namespace Spigot.Tests.Load
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
-            var summary = BenchmarkRunner.Run<Spigots>();
-            var x = summary;
+            BenchmarkRunner.Run<Spigots>();
         }
     }
 }
