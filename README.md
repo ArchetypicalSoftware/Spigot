@@ -58,3 +58,37 @@ Sending is just as simple:
 ```
 
 For more details, check out the [full documentation](docs)
+
+
+
+
+## Did you know: 
+
+### Spigot is [CloudEvents](https://cloudevents.io) Compatible
+<img src='https://cloudevents.io/img/logos/cloudevents-icon-color.png' width='250px'>
+
+### Spigot can run on all of these providers:
+
+
+|Stream|Description|||
+|---|---|---|---|
+| Archetypical.Software.Spigot.Streams.AWS  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.AWS.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.AWS/)   | [![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.AWS.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.AWS/)
+| Archetypical.Software.Spigot.Streams.Azure  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.Azure.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.Azure/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.Azure.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.Azure/)
+| Archetypical.Software.Spigot.Streams.GoogleCloud  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.GoogleCloud.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.GoogleCloud/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.GoogleCloud.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.GoogleCloud/)
+| Archetypical.Software.Spigot.Streams.RabbitMQ  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.RabbitMQ.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.RabbitMQ/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.RabbitMQ.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.RabbitMQ/)
+| Archetypical.Software.Spigot.Streams.Redis  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.Redis.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.Redis/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.Redis.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.Redis/)
+| Archetypical.Software.Spigot.Streams.ZeroMQ  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.ZeroMQ.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.ZeroMQ/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.ZeroMQ.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.ZeroMQ/)
+| Archetypical.Software.Spigot.Streams.Kafka  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.Kafka.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.Kafka/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.Kafka.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.Kafka/)
+| Archetypical.Software.Spigot.Streams.KubeMQ  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Streams.KubeMQ.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.KubeMQ/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Streams.KubeMQ.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Streams.KubeMQ/)
+
+
+### Spigot supports these serialization formats:
+
+|Stream|Description|||
+|---|---|---|---|
+| Archetypical.Software.Spigot.Serializers.Json  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Serializers.Json.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Serializers.Json/)   | [![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Serializers.Json.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Serializers.Json/)
+| Archetypical.Software.Spigot.Serializers.MsgPack  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Serializers.MsgPack.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Serializers.MsgPack/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Serializers.MsgPack.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Serializers.MsgPack/)
+| Archetypical.Software.Spigot.Serializers.Protobuf  |   |[![Nuget](https://img.shields.io/nuget/v/Archetypical.Software.Spigot.Serializers.Protobuf.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Serializers.Protobuf/)   |[![Nuget](https://img.shields.io/nuget/dt/Archetypical.Software.Spigot.Serializers.Protobuf.svg?style=for-the-badge)](https://www.nuget.org/packages/Archetypical.Software.Spigot.Serializers.Protobuf/)
+
+
+### Check out some hands-on [Demos](https://github.com/ArchetypicalSoftware/Spigot.Demo/tree/main) 
