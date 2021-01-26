@@ -46,7 +46,8 @@ namespace Archetypical.Software.Spigot
             _logger.LogTrace("Sending [{0}] with id {1}", wrapper.Type, wrapper.Id);
 
             //Send it to all listeners in the same process space
-            _spigot.Knobs[typeof(T).Name]?.Invoke(wrapper);
+            if (_spigot.Knobs.ContainsKey(typeof(T).Name))
+                _spigot.Knobs[typeof(T).Name]?.Invoke(wrapper);
 
             var contents = new CloudEventContent(wrapper, ContentMode.Structured, new JsonEventFormatter());
             var bytes = contents.ReadAsByteArrayAsync().GetAwaiter().GetResult();
